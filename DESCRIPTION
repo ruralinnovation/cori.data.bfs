@@ -20,8 +20,10 @@ Imports:
     utils
 Suggests:
     cori.charts,
+    cori.data.pep,
     ruraldefinitions,
     ggplot2,
+    ggrepel,
     knitr,
     rmarkdown,
     scales
