@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
   fig.height = 6,
   out.width  = "100%"
 )
+has_pep <- requireNamespace("cori.data.pep", quietly = TRUE)
 ```
 
 `cori.data.bfs` provides county, state, and national business application counts
@@ -57,7 +58,7 @@ dplyr::glimpse(county)
 Joining BFS with population from `cori.data.pep` produces per-capita rates.
 Joining with `ruraldefinitions` lets us compare rural and non-rural trends.
 
-```{r rural-trend, fig.alt="Line chart of business applications per 1000 population, rural vs nonrural, 2005-2024"}
+```{r rural-trend, eval=has_pep, fig.alt="Line chart of business applications per 1000 population, rural vs nonrural, 2005-2024"}
 library(ggplot2)
 library(cori.charts)
 library(dplyr)
@@ -141,7 +142,7 @@ This chart plots each county's 10-year percent change in population (x-axis)
 against its 10-year percent change in business applications (y-axis), colored
 by rural status with a trend line for each group.
 
-```{r scatter, fig.alt="Scatterplot of population change vs business application change 2014-2024, rural vs nonrural counties"}
+```{r scatter, eval=has_pep, fig.alt="Scatterplot of population change vs business application change 2014-2024, rural vs nonrural counties"}
 # BFS: % change 2014 -> 2024
 bfs_change <- read_bfs_from_s3(years = c(2014, 2024)) |>
   filter(nchar(geoid) == 5) |>
@@ -203,7 +204,7 @@ ggplot(scatter_dta, aes(x = pop_pct_chg, y = bfs_pct_chg, color = is_rural)) +
 
 ## County spotlight — Grafton County, NH
 
-```{r grafton, fig.alt="Bar chart of business applications in Grafton County NH 2005-2024"}
+```{r grafton, eval=has_pep, fig.alt="Bar chart of business applications in Grafton County NH 2005-2024"}
 grafton_bfs <- read_bfs_from_s3(
   geoids = "33009",
   years  = 2005:2024
