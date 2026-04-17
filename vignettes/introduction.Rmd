@@ -1,0 +1,244 @@
+---
+title: "Introduction to cori.data.bfs"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to cori.data.bfs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  eval    = TRUE,
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 9,
+  fig.height = 6,
+  out.width  = "100%"
+)
+has_pep <- requireNamespace("cori.data.pep", quietly = TRUE)
+```
+
+`cori.data.bfs` provides county, state, and national business application counts
+from the U.S. Census Bureau's Business Formation Statistics (BFS), processed and
+stored in CORI's S3 data lake. Data cover 2005–present at annual frequency.
+
+## Variables
+
+```{r codebook}
+library(cori.data.bfs)
+
+get_bfs_codebook() |> knitr::kable()
+```
+
+## Reading data
+
+All data are returned in long format: one row per `geoid / year / variable`.
+
+```{r read-all}
+df <- read_bfs_from_s3()
+dplyr::glimpse(df)
+```
+
+Filter by geography, year, or variable:
+
+```{r read-filtered}
+# County-level only, 2010 onward
+county <- read_bfs_from_s3(
+  years  = 2010:2024
+) |>
+  dplyr::filter(nchar(geoid) == 5)
+
+dplyr::glimpse(county)
+```
+
+## Business applications — rural vs. non-rural
+
+Joining BFS with population from `cori.data.pep` produces per-capita rates.
+Joining with `ruraldefinitions` lets us compare rural and non-rural trends.
+
+```{r rural-trend, eval=has_pep, fig.alt="Line chart of business applications per 1000 population, rural vs nonrural, 2005-2024"}
+library(ggplot2)
+library(cori.charts)
+library(dplyr)
+library(ruraldefinitions)
+
+load_fonts()
+
+rural_xwalk <- ruraldefinitions::cbsa_2023 |>
+  select(geoid, is_rural)
+
+# BFS county totals by rural status
+bfs_rural <- read_bfs_from_s3(years = 2005:2024) |>
+  filter(nchar(geoid) == 5) |>
+  left_join(rural_xwalk, by = "geoid") |>
+  filter(!is.na(is_rural)) |>
+  group_by(year, is_rural) |>
+  summarise(applications = sum(value, na.rm = TRUE), .groups = "drop")
+
+# Population from cori.data.pep
+pop_rural <- cori.data.pep::read_pep_from_s3(
+  variables = "population",
+  years     = 2005:2024
+) |>
+  filter(nchar(geoid) == 5) |>
+  left_join(rural_xwalk, by = "geoid") |>
+  filter(!is.na(is_rural)) |>
+  group_by(year, is_rural) |>
+  summarise(population = sum(value, na.rm = TRUE), .groups = "drop")
+
+chrt_dta <- bfs_rural |>
+  left_join(pop_rural, by = c("year", "is_rural")) |>
+  mutate(apps_per_1k = applications / population * 1000)
+
+label_df <- chrt_dta |> filter(year == max(year))
+
+ggplot(chrt_dta, aes(x = year, y = apps_per_1k, color = is_rural)) +
+  annotate("rect", xmin = 2007.9, xmax = 2009.5,
+           ymin = -Inf, ymax = Inf, fill = "grey80", alpha = 0.4) +
+  annotate("rect", xmin = 2020, xmax = 2020.5,
+           ymin = -Inf, ymax = Inf, fill = "grey80", alpha = 0.4) +
+  geom_line(linewidth = 1.2) +
+  ggrepel::geom_text_repel(
+    data        = label_df,
+    aes(label   = paste0(is_rural, "\n(", round(apps_per_1k, 1), ")")),
+    nudge_x     = 0.5,
+    direction   = "y",
+    hjust       = 0,
+    segment.color = NA,
+    size        = 3.5,
+    lineheight  = 0.9
+  ) +
+  scale_color_manual(values = c(
+    "Rural"    = cori_colors[["Dark Green"]],
+    "Nonrural" = cori_colors[["CORI Gray"]]
+  )) +
+  scale_x_continuous(
+    breaks = seq(2005, 2024, by = 4),
+    expand = expansion(mult = c(0, 0.2))
+  ) +
+  scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+  theme_cori() +
+  theme(legend.position = "none") +
+  labs(
+    title    = "Rural business formation surged during the pandemic and has held",
+    subtitle = "Business applications per 1,000 population, 2005 - 2024",
+    x        = NULL,
+    y        = NULL,
+    caption  = paste0(
+      "Source: CORI analysis of U.S. Census Bureau Business Formation Statistics (BFS) ",
+      "and Population Estimates \nProgram (PEP).\n",
+      "Shaded bands mark Great Recession (2008 - 09) and COVID-19 (2020). ",
+      "Rural classification: CORI CBSA 2023 \ndefinition."
+    )
+  )
+```
+
+## Population growth vs. business formation — county scatter
+
+Do counties that are gaining population also see more new business activity?
+This chart plots each county's 10-year percent change in population (x-axis)
+against its 10-year percent change in business applications (y-axis), colored
+by rural status with a trend line for each group.
+
+```{r scatter, eval=has_pep, fig.alt="Scatterplot of population change vs business application change 2014-2024, rural vs nonrural counties"}
+# BFS: % change 2014 -> 2024
+bfs_change <- read_bfs_from_s3(years = c(2014, 2024)) |>
+  filter(nchar(geoid) == 5) |>
+  tidyr::pivot_wider(names_from = year, values_from = value, names_prefix = "bfs_") |>
+  mutate(bfs_pct_chg = (bfs_2024 - bfs_2014) / bfs_2014 * 100) |>
+  filter(!is.na(bfs_pct_chg), is.finite(bfs_pct_chg)) |>
+  select(geoid, bfs_pct_chg)
+
+# PEP: % change 2014 -> 2024
+pop_change <- cori.data.pep::read_pep_from_s3(
+  variables = "population",
+  years     = c(2014, 2024)
+) |>
+  filter(nchar(geoid) == 5) |>
+  tidyr::pivot_wider(names_from = year, values_from = value, names_prefix = "pop_") |>
+  mutate(pop_pct_chg = (pop_2024 - pop_2014) / pop_2014 * 100) |>
+  filter(!is.na(pop_pct_chg), is.finite(pop_pct_chg)) |>
+  select(geoid, pop_pct_chg)
+
+scatter_dta <- bfs_change |>
+  inner_join(pop_change, by = "geoid") |>
+  left_join(rural_xwalk, by = "geoid") |>
+  filter(!is.na(is_rural)) |>
+  filter(
+    bfs_pct_chg >= quantile(bfs_pct_chg, 0.02),
+    bfs_pct_chg <= quantile(bfs_pct_chg, 0.98),
+    pop_pct_chg >= quantile(pop_pct_chg, 0.02),
+    pop_pct_chg <= quantile(pop_pct_chg, 0.98)
+  )
+
+ggplot(scatter_dta, aes(x = pop_pct_chg, y = bfs_pct_chg, color = is_rural)) +
+  geom_point(alpha = 0.3, size = 1.2) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1.2) +
+  geom_vline(xintercept = 0, color = "black", linewidth = 0.4, linetype = "dashed") +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.4, linetype = "dashed") +
+  scale_color_manual(
+    values = c(
+      "Rural"    = cori_colors[["Emerald"]],
+      "Nonrural" = cori_colors[["Dark Purple"]]
+    ),
+    name = NULL
+  ) +
+  scale_x_continuous(labels = scales::label_percent(scale = 1)) +
+  scale_y_continuous(labels = scales::label_percent(scale = 1)) +
+  theme_cori() +
+  theme(legend.position = "bottom") +
+  labs(
+    title    = "Population growth and business formation move together",
+    subtitle = "Business application change, 2014 - 2024",
+    x        = "Population change, 2014 - 2024",
+    y        = NULL,
+    caption  = paste0(
+      "Source: CORI analysis of U.S. Census Bureau Business Formation Statistics (BFS) ",
+      "and Population Estimates\n Program (PEP).\n",
+      "Each point = one county. Trend lines fit by OLS. Extreme outliers (2nd - 98th percentile) trimmed.\nRural classification: CORI CBSA 2023 definition."
+    )
+  )
+```
+
+## County spotlight — Grafton County, NH
+
+```{r grafton, eval=has_pep, fig.alt="Bar chart of business applications in Grafton County NH 2005-2024"}
+grafton_bfs <- read_bfs_from_s3(
+  geoids = "33009",
+  years  = 2005:2024
+)
+
+grafton_pop <- cori.data.pep::read_pep_from_s3(
+  variables = "population",
+  geoids    = "33009",
+  years     = 2005:2024
+) |>
+  select(year, population = value)
+
+grafton <- grafton_bfs |>
+  left_join(grafton_pop, by = "year") |>
+  mutate(apps_per_1k = value / population * 1000)
+
+ggplot(grafton, aes(x = year, y = apps_per_1k)) +
+  annotate("rect", xmin = 2007.9, xmax = 2009.5,
+           ymin = -Inf, ymax = Inf, fill = "grey80", alpha = 0.4) +
+  annotate("rect", xmin = 2020, xmax = 2020.5,
+           ymin = -Inf, ymax = Inf, fill = "grey80", alpha = 0.4) +
+  geom_col(fill = cori_colors[["Dark Green"]], width = 0.7) +
+  scale_x_continuous(breaks = seq(2005, 2024, by = 4)) +
+  scale_y_continuous(labels = scales::label_number(accuracy = 0.1)) +
+  theme_cori() +
+  labs(
+    title    = "Business applications per 1,000 residents in Grafton County, NH",
+    subtitle = "Annual business applications (BA series), 2005\u20132024",
+    x        = NULL,
+    y        = NULL,
+    caption  = paste0(
+      "Source: CORI analysis of U.S. Census Bureau Business Formation Statistics (BFS) ",
+      "and Population Estimates \nProgram (PEP).\n",
+      "Shaded bands mark Great Recession (2008\u201309) and COVID-19 (2020)."
+    )
+  )
+```

@@ -1,0 +1,32 @@
+Package: cori.data.bfs
+Type: Package
+Title: Access and Analyze Census Bureau Business Formation Statistics
+Version: 0.1.0
+Authors@R: person("Drew", "Rosebush", email = "drew.rosebush@ruralinnovation.us", role = c("aut", "cre"))
+Description: Access and analyze U.S. Census Bureau Business Formation Statistics
+    (BFS) at the county, state, and national level from 2005 to present.
+    Provides tools to download and process business application counts from
+    Census source files, write processed data to S3, and read it back via DuckDB.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    DBI,
+    dplyr,
+    duckdb,
+    readxl,
+    stringr,
+    tidyr,
+    utils
+Suggests:
+    cori.charts,
+    cori.data.pep,
+    ruraldefinitions,
+    ggplot2,
+    ggrepel,
+    knitr,
+    rmarkdown,
+    scales
+RoxygenNote: 7.3.3
+VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
