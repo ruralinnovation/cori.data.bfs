@@ -1,35 +1,12 @@
-#' Return the current latest BFS vintage from S3
-#'
-#' Reads the `_LATEST` pointer written by [write_bfs_processed_to_s3()] and
-#' returns the vintage string (e.g., `"vintage_2024"`).
-#'
-#' @param s3_bucket Character. S3 bucket name. Default: `"cori.data.bfs"`.
-#' @param s3_path_prefix Character. Optional prefix matching the one used in
-#'   [write_bfs_processed_to_s3()], e.g. `"test/"`. Default: `""`.
-#'
-#' @return Character. Current vintage tag (e.g., `"vintage_2024"`).
-#'
-#' @export
-latest_bfs_vintage <- function(s3_bucket = "cori.data.bfs", s3_path_prefix = "") {
-  url <- sprintf(
-    "https://s3.us-east-1.amazonaws.com/%s/%sdata_processed/_LATEST",
-    s3_bucket, s3_path_prefix
-  )
-  tryCatch(
-    readLines(url, n = 1L, warn = FALSE),
-    error = function(e) stop(sprintf(
-      "Could not read _LATEST from s3://%s/%sdata_processed/_LATEST. Has write_bfs_processed_to_s3() been run?",
-      s3_bucket, s3_path_prefix
-    ))
-  )
-}
-
+devtools::load_all()
 
 #' Write processed BFS data to S3 as a versioned vintage
 #'
 #' Downloads the Census BFS Excel file, processes it into the five-column tidy
 #' format, and writes year-partitioned parquet files to S3. A `_LATEST` pointer
 #' file is updated so [read_bfs_from_s3()] can find the current vintage.
+#' 
+#' DO NOT EXPORT
 #'
 #' @param years Integer vector. Years to include. Default: `2005` to current year.
 #' @param s3_bucket Character. S3 bucket name. Default: `"cori.data.bfs"`.
@@ -44,7 +21,7 @@ latest_bfs_vintage <- function(s3_bucket = "cori.data.bfs", s3_path_prefix = "")
 #' @seealso [read_bfs_from_s3()], [get_bfs_codebook()]
 #'
 #' @keywords internal
-#' @export
+#' 
 write_bfs_processed_to_s3 <- function(
     years          = 2005:as.integer(format(Sys.Date(), "%Y")),
     s3_bucket      = "cori.data.bfs",

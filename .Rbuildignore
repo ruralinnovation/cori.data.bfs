@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 ^RELEASE_CALENDAR\.md$
 ^renv\.lock$
+^data-raw$
+^index\.qmd$
+^\.git$

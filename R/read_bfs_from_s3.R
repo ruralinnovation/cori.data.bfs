@@ -3,16 +3,14 @@
 #' Queries CORI's processed Business Formation Statistics parquet files from S3
 #' using DuckDB. Returns long-format data — one row per geoid/year/variable.
 #'
-#' @param vintage Character. Vintage to read, e.g. `"2024"`. Default: `"latest"`,
-#'   which reads the `_LATEST` pointer written by [write_bfs_processed_to_s3()].
+#' @param vintage Character. Vintage to read, e.g. `"2024"`. Default: `"latest"`.
 #' @param variables Character vector. Variables to return. Default: all.
 #'   See [get_bfs_codebook()] for names.
 #' @param years Integer vector. Years to return. Default: all.
 #' @param geoids Character vector. FIPS codes to return (5-digit county, 2-digit
 #'   state, or `"00"` for national). Default: all.
 #' @param s3_bucket Character. S3 bucket name. Default: `"cori.data.bfs"`.
-#' @param s3_path_prefix Character. Optional prefix matching the one used in
-#'   [write_bfs_processed_to_s3()], e.g. `"test/"`. Default: `""`.
+#' @param s3_path_prefix Character. Optional prefix, e.g. `"test/"`. Default: `""`.
 #'
 #' @return A data frame with columns: `geoid`, `year`, `variable`, `value`,
 #'   `agg_var`.
@@ -91,4 +89,28 @@ read_bfs_from_s3 <- function(
       value   = as.numeric(value),
       agg_var = as.numeric(agg_var)
     )
+}
+
+#' Return the current latest BFS vintage from S3
+#'
+#' Reads the `_LATEST` pointer and returns the vintage string (e.g., `"vintage_2024"`).
+#'
+#' @param s3_bucket Character. S3 bucket name. Default: `"cori.data.bfs"`.
+#' @param s3_path_prefix Character. Optional prefix, e.g. `"test/"`. Default: `""`.
+#'
+#' @return Character. Current vintage tag (e.g., `"vintage_2024"`).
+#'
+#' @export
+latest_bfs_vintage <- function(s3_bucket = "cori.data.bfs", s3_path_prefix = "") {
+  url <- sprintf(
+    "https://s3.us-east-1.amazonaws.com/%s/%sdata_processed/_LATEST",
+    s3_bucket, s3_path_prefix
+  )
+  tryCatch(
+    readLines(url, n = 1L, warn = FALSE),
+    error = function(e) stop(sprintf(
+      "Could not read _LATEST from s3://%s/%sdata_processed/_LATEST. Has write_bfs_processed_to_s3() been run?",
+      s3_bucket, s3_path_prefix
+    ))
+  )
 }
