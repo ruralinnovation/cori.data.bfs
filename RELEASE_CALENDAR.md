@@ -24,11 +24,12 @@
 
 ## Vintage Log
 
+*Add a new row each time a vintage is captured. Most recent at top.*
+
 | Vintage | Data covers | Captured | By | S3 path |
 |---|---|---|---|---|
+| vintage_2025 | 2005–2025 | 2026-06-16 | John | `s3://cori.data.bfs/data_processed/vintage_2025/` |
 | vintage_2024 | 2005–2024 | 2026-04-10 | Drew | `s3://cori.data.bfs/data_processed/vintage_2024/` |
-
-*Add a new row each time a vintage is captured. Most recent at top.*
 
 ---
 
@@ -36,6 +37,6 @@
 
 | Field | Detail |
 |---|---|
-| **Expected release** | ~June 2026 (2025 data) |
+| **Expected release** | ~June 2027 (2026 data) |
 | **Responsible** | Drew |
 | **Watch page** | https://www.census.gov/econ/bfs/data/county.html |
