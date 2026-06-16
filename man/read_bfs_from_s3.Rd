@@ -14,8 +14,7 @@ read_bfs_from_s3(
 )
 }
 \arguments{
-\item{vintage}{Character. Vintage to read, e.g. \code{"2024"}. Default: \code{"latest"},
-which reads the \verb{_LATEST} pointer written by \code{\link[=write_bfs_processed_to_s3]{write_bfs_processed_to_s3()}}.}
+\item{vintage}{Character. Vintage to read, e.g. \code{"2024"}. Default: \code{"latest"}.}
 
 \item{variables}{Character vector. Variables to return. Default: all.
 See \code{\link[=get_bfs_codebook]{get_bfs_codebook()}} for names.}
@@ -27,8 +26,7 @@ state, or \code{"00"} for national). Default: all.}
 
 \item{s3_bucket}{Character. S3 bucket name. Default: \code{"cori.data.bfs"}.}
 
-\item{s3_path_prefix}{Character. Optional prefix matching the one used in
-\code{\link[=write_bfs_processed_to_s3]{write_bfs_processed_to_s3()}}, e.g. \code{"test/"}. Default: \code{""}.}
+\item{s3_path_prefix}{Character. Optional prefix, e.g. \code{"test/"}. Default: \code{""}.}
 }
 \value{
 A data frame with columns: \code{geoid}, \code{year}, \code{variable}, \code{value},
