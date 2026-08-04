@@ -1,11 +1,13 @@
 #' Get the cori.data.bfs variable codebook
 #'
-#' Returns documentation for all variables produced by the CORI BFS processing
-#' pipeline.
+#' Returns documentation for all variables available from
+#' [get_business_applications()].
 #'
-#' @return A data frame with columns: `variable`, `label`, `unit`, `notes`.
+#' @return A data frame with columns: `variable`, `raw_variable`, `label`,
+#'   `unit`, `notes`.
+#'   `raw_variable` is the original name stored in S3 parquet files.
 #'
-#' @seealso [read_bfs_from_s3()]
+#' @seealso [get_business_applications()]
 #'
 #' @examples
 #' get_bfs_codebook()
@@ -16,6 +18,10 @@ get_bfs_codebook <- function() {
     stringsAsFactors = FALSE,
 
     variable = c(
+      "business_applications"
+    ),
+
+    raw_variable = c(
       "business_applications"
     ),
 

@@ -21,7 +21,6 @@
 #' @param years Integer vector. Years to return. Default: `2005` to current year.
 #'
 #' @keywords internal
-#' @export
 pull_bfs <- function(years = 2005:as.integer(format(Sys.Date(), "%Y"))) {
 
   fp <- file.path(tempdir(), "bfs_county_apps_annual.xlsx")
