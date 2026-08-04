@@ -1,12 +1,11 @@
+# Run devtools::load_all() before executing this script.
 devtools::load_all()
 
 #' Write processed BFS data to S3 as a versioned vintage
 #'
-#' Downloads the Census BFS Excel file, processes it into the five-column tidy
+#' Downloads the Census BFS Excel file, processes it into the four-column tidy
 #' format, and writes year-partitioned parquet files to S3. A `_LATEST` pointer
-#' file is updated so [read_bfs_from_s3()] can find the current vintage.
-#' 
-#' DO NOT EXPORT
+#' file is updated so [get_business_applications()] can find the current vintage.
 #'
 #' @param years Integer vector. Years to include. Default: `2005` to current year.
 #' @param s3_bucket Character. S3 bucket name. Default: `"cori.data.bfs"`.
@@ -18,10 +17,7 @@ devtools::load_all()
 #'
 #' @return Invisibly, a named list: `$vintage` and `$n_rows`.
 #'
-#' @seealso [read_bfs_from_s3()], [get_bfs_codebook()]
-#'
 #' @keywords internal
-#' 
 write_bfs_processed_to_s3 <- function(
     years          = 2005:as.integer(format(Sys.Date(), "%Y")),
     s3_bucket      = "cori.data.bfs",
@@ -82,7 +78,6 @@ write_bfs_processed_to_s3 <- function(
 
 
 # Internal: upload a directory or single file to S3 via AWS CLI.
-#' @keywords internal
 .bfs_upload_to_s3 <- function(s3_bucket, s3_prefix, local_path) {
   s3_uri <- sprintf("s3://%s/%s", s3_bucket, s3_prefix)
   message(sprintf("Uploading to %s...", s3_uri))
