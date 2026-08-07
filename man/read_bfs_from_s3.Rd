@@ -14,43 +14,26 @@ read_bfs_from_s3(
 )
 }
 \arguments{
-\item{vintage}{Character. Vintage to read, e.g. \code{"2024"}. Default: \code{"latest"},
-which reads the \verb{_LATEST} pointer written by \code{\link[=write_bfs_processed_to_s3]{write_bfs_processed_to_s3()}}.}
+\item{vintage}{Passed to \code{\link[=get_business_applications]{get_business_applications()}}.}
 
-\item{variables}{Character vector. Variables to return. Default: all.
-See \code{\link[=get_bfs_codebook]{get_bfs_codebook()}} for names.}
+\item{variables}{Passed to \code{\link[=get_business_applications]{get_business_applications()}}.}
 
-\item{years}{Integer vector. Years to return. Default: all.}
+\item{years}{Passed to \code{\link[=get_business_applications]{get_business_applications()}}.}
 
-\item{geoids}{Character vector. FIPS codes to return (5-digit county, 2-digit
-state, or \code{"00"} for national). Default: all.}
+\item{geoids}{Passed to \code{\link[=get_business_applications]{get_business_applications()}}.}
 
-\item{s3_bucket}{Character. S3 bucket name. Default: \code{"cori.data.bfs"}.}
+\item{s3_bucket}{Ignored. No longer configurable in the public API.}
 
-\item{s3_path_prefix}{Character. Optional prefix matching the one used in
-\code{\link[=write_bfs_processed_to_s3]{write_bfs_processed_to_s3()}}, e.g. \code{"test/"}. Default: \code{""}.}
+\item{s3_path_prefix}{Ignored. No longer configurable in the public API.}
 }
 \value{
-A data frame with columns: \code{geoid}, \code{year}, \code{variable}, \code{value},
-\code{agg_var}.
+A data frame. See \code{\link[=get_business_applications]{get_business_applications()}} for details.
 }
 \description{
-Queries CORI's processed Business Formation Statistics parquet files from S3
-using DuckDB. Returns long-format data — one row per geoid/year/variable.
-}
-\examples{
-\dontrun{
-# All data, latest vintage
-df <- read_bfs_from_s3()
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
 
-# Business applications for specific counties
-df <- read_bfs_from_s3(
-  variables = "business_applications",
-  geoids    = c("54011", "54025")
-)
-}
-
+\code{read_bfs_from_s3()} is deprecated. Use \code{\link[=get_business_applications]{get_business_applications()}} instead.
 }
 \seealso{
-\code{\link[=latest_bfs_vintage]{latest_bfs_vintage()}}, \code{\link[=get_bfs_codebook]{get_bfs_codebook()}}
+\code{\link[=get_business_applications]{get_business_applications()}}
 }

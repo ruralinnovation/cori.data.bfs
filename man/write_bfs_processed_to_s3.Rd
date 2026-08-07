@@ -29,11 +29,8 @@ before uploading. Default: \code{FALSE}.}
 Invisibly, a named list: \verb{$vintage} and \verb{$n_rows}.
 }
 \description{
-Downloads the Census BFS Excel file, processes it into the five-column tidy
+Downloads the Census BFS Excel file, processes it into the four-column tidy
 format, and writes year-partitioned parquet files to S3. A \verb{_LATEST} pointer
-file is updated so \code{\link[=read_bfs_from_s3]{read_bfs_from_s3()}} can find the current vintage.
-}
-\seealso{
-\code{\link[=read_bfs_from_s3]{read_bfs_from_s3()}}, \code{\link[=get_bfs_codebook]{get_bfs_codebook()}}
+file is updated so \code{\link[=get_business_applications]{get_business_applications()}} can find the current vintage.
 }
 \keyword{internal}

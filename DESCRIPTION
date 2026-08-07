@@ -18,6 +18,10 @@ Imports:
     stringr,
     tidyr,
     utils
+Remotes:
+  ruralinnovation/cori.charts,
+  ruralinnovation/cori.data.pep,
+  ruralinnovation/ruraldefinitions
 Suggests:
     cori.charts,
     cori.data.pep,
@@ -25,7 +29,7 @@ Suggests:
     ggplot2,
     ggrepel,
     knitr,
-    rmarkdown,
+    markdown,
     scales
 RoxygenNote: 7.3.3
 VignetteBuilder: knitr

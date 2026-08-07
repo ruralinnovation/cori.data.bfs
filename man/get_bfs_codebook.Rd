@@ -7,16 +7,18 @@
 get_bfs_codebook()
 }
 \value{
-A data frame with columns: \code{variable}, \code{label}, \code{unit}, \code{notes}.
+A data frame with columns: \code{variable}, \code{raw_variable}, \code{label},
+\code{unit}, \code{notes}.
+\code{raw_variable} is the original name stored in S3 parquet files.
 }
 \description{
-Returns documentation for all variables produced by the CORI BFS processing
-pipeline.
+Returns documentation for all variables available from
+\code{\link[=get_business_applications]{get_business_applications()}}.
 }
 \examples{
 get_bfs_codebook()
 
 }
 \seealso{
-\code{\link[=read_bfs_from_s3]{read_bfs_from_s3()}}
+\code{\link[=get_business_applications]{get_business_applications()}}
 }
