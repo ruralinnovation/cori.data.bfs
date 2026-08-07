@@ -56,12 +56,21 @@ write_bfs_processed_to_s3 <- function(
     s3_vintage_prefix <- sprintf("%sdata_processed/%s/", s3_path_prefix, vintage_tag)
 
     if (overwrite) {
+      if (!cori.data.s3::has_local_aws_credentials()) {
+        stop("No local AWS credentials found. Deleting an S3 prefix requires ",
+             "local AWS credentials. Run cori.data.s3::set_aws_credentials() or ",
+             "configure the AWS CLI.", call. = FALSE)
+      }
       s3_uri <- sprintf("s3://%s/%s", s3_bucket, s3_vintage_prefix)
       message(sprintf("Deleting existing S3 prefix: %s", s3_uri))
       system2("aws", args = c("s3", "rm", s3_uri, "--recursive"))
     }
 
-    .bfs_upload_to_s3(s3_bucket, s3_vintage_prefix, out_dir)
+    cori.data.s3::put_s3_objects_recursive(s3_bucket, s3_vintage_prefix, out_dir)
+
+    # _LATEST is a pointer meant to be overwritten on every run, not
+    # versioned data -- put_s3_object()'s overwrite-protection would block
+    # every run after the first, so it's uploaded directly instead.
     .bfs_upload_to_s3(
       s3_bucket,
       sprintf("%sdata_processed/_LATEST", s3_path_prefix),
@@ -74,16 +83,14 @@ write_bfs_processed_to_s3 <- function(
 }
 
 
-# Internal: upload a directory or single file to S3 via AWS CLI.
+# Internal: upload the _LATEST pointer file to S3 via AWS CLI, always
+# overwriting (see comment at the call site for why this bypasses
+# put_s3_object()).
 .bfs_upload_to_s3 <- function(s3_bucket, s3_prefix, local_path) {
   s3_uri <- sprintf("s3://%s/%s", s3_bucket, s3_prefix)
   message(sprintf("Uploading to %s...", s3_uri))
 
-  if (file.info(local_path)$isdir) {
-    exit_code <- base::system2("aws", args = c("s3", "sync", local_path, s3_uri))
-  } else {
-    exit_code <- base::system2("aws", args = c("s3", "cp", local_path, s3_uri))
-  }
+  exit_code <- base::system2("aws", args = c("s3", "cp", local_path, s3_uri))
 
   if (exit_code != 0) stop(sprintf("AWS CLI upload failed: %s -> %s", local_path, s3_uri))
 }

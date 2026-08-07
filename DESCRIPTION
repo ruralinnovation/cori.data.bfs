@@ -11,6 +11,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
+    cori.data.s3,
     DBI,
     dplyr,
     duckdb,
@@ -21,6 +22,7 @@ Imports:
 Remotes:
   ruralinnovation/cori.charts,
   ruralinnovation/cori.data.pep,
+  ruralinnovation/cori.data.s3,
   ruralinnovation/ruraldefinitions
 Suggests:
     cori.charts,

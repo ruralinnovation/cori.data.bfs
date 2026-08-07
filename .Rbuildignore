@@ -5,3 +5,4 @@
 ^data-raw$
 ^index\.qmd$
 ^\.git$
+^docs$
