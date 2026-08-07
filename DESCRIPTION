@@ -18,6 +18,10 @@ Imports:
     stringr,
     tidyr,
     utils
+Remotes:
+  ruralinnovation/cori.charts,
+  ruralinnovation/cori.data.pep,
+  ruralinnovation/ruraldefinitions
 Suggests:
     cori.charts,
     cori.data.pep,

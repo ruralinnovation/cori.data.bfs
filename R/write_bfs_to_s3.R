@@ -1,6 +1,3 @@
-# Run devtools::load_all() before executing this script.
-devtools::load_all()
-
 #' Write processed BFS data to S3 as a versioned vintage
 #'
 #' Downloads the Census BFS Excel file, processes it into the four-column tidy
