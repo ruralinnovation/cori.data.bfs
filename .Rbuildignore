@@ -6,3 +6,4 @@
 ^index\.qmd$
 ^\.git$
 ^docs$
+^\.idea$

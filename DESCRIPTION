@@ -10,8 +10,9 @@ Description: Access and analyze U.S. Census Bureau Business Formation Statistics
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+Depends:
+    cori.data.s3
 Imports:
-    cori.data.s3,
     DBI,
     dplyr,
     duckdb,
@@ -34,5 +35,5 @@ Suggests:
     markdown,
     scales
 RoxygenNote: 7.3.3
-VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr

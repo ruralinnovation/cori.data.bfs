@@ -3,3 +3,5 @@
 export(get_bfs_codebook)
 export(get_business_applications)
 export(read_bfs_from_s3)
+import(DBI)
+importFrom(cori.data.s3,connect_to_s3)
