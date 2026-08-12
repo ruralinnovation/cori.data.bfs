@@ -1,0 +1,20 @@
+url: https://ruralinnovation.github.io/cori.data.bfs
+
+template:
+  bootstrap: 5
+
+reference:
+- title: Business Applications
+  contents:
+  - get_business_applications
+
+- title: Utilities
+  contents:
+  - get_bfs_codebook
+  - read_bfs_from_s3
+
+- title: Internal
+  desc: Functions for data processing and maintenance
+  contents:
+  - pull_bfs
+  - write_bfs_processed_to_s3

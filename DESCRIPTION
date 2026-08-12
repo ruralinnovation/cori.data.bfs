@@ -8,6 +8,7 @@ Description: Access and analyze U.S. Census Bureau Business Formation Statistics
     Provides tools to download and process business application counts from
     Census source files, write processed data to S3, and read it back via DuckDB.
 License: MIT + file LICENSE
+URL: https://ruralinnovation.github.io/cori.data.bfs
 Encoding: UTF-8
 LazyData: true
 Depends:
