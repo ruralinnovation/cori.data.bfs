@@ -1,0 +1,16 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/404.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/LICENSE-text.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/RELEASE_CALENDAR.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/articles/index.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/articles/introduction.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/authors.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/index.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/reference/get_bfs_codebook.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/reference/get_business_applications.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/reference/index.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/reference/pull_bfs.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/reference/read_bfs_from_s3.html</loc></url>
+<url><loc>https://ruralinnovation.github.io/cori.data.bfs/reference/write_bfs_processed_to_s3.html</loc></url>
+</urlset>
+
