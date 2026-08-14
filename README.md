@@ -4,29 +4,27 @@ Access and analyze U.S. Census Bureau Business Formation Statistics (BFS) at the
 
 ## What's in the package
 
-Two variables, county + state + national, annual:
-
-| Variable | Description |
-|---|---|
+| Variable                | Description                             |
+|-------------------------|-----------------------------------------|
 | `business_applications` | Total business applications (BA series) |
 
 Data are returned in long format: one row per `geoid / year / variable`.
 
-| Geography | geoid format | Example |
-|---|---|---|
-| County | 5-digit FIPS | `"33009"` |
-| State | 2-digit FIPS | `"33"` |
-| National | `"00"` | `"00"` |
+| Geography | geoid format | Example   |
+|-----------|--------------|-----------|
+| County    | 5-digit FIPS | `"33009"` |
+| State     | 2-digit FIPS | `"33"`    |
+| National  | `"00"`       | `"00"`    |
 
 ## Installation
 
-```r
+``` r
 remotes::install_github("ruralinnovation/cori.data.bfs")
 ```
 
 ## Usage
 
-```r
+``` r
 library(cori.data.bfs)
 
 # All data, latest vintage
@@ -45,10 +43,7 @@ get_bfs_codebook()
 
 ## Data source
 
-**Census Bureau Business Formation Statistics**
-- Source file: `https://www.census.gov/econ/bfs/xlsx/bfs_county_apps_annual.xlsx`
-- Updated annually (~6 months after year-end)
-- Coverage: 2005–present
+**Census Bureau Business Formation Statistics** - Source file: `https://www.census.gov/econ/bfs/xlsx/bfs_county_apps_annual.xlsx` - Updated annually (\~6 months after year-end) - Coverage: 2005–present
 
 See [RELEASE_CALENDAR.md](RELEASE_CALENDAR.md) for vintage log and update schedule.
 
@@ -56,6 +51,6 @@ See [RELEASE_CALENDAR.md](RELEASE_CALENDAR.md) for vintage log and update schedu
 
 To refresh the S3 data after Census releases new estimates:
 
-```r
+``` r
 write_bfs_processed_to_s3(years = 2005:2024)
 ```
