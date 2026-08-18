@@ -1,10 +1,10 @@
 # Introduction to cori.data.bfs
 
 `cori.data.bfs` provides annual business application counts from the
-U.S. Census Bureau’s Business Formation Statistics (BFS), processed and
-stored in CORI’s S3 data lake. Data cover 2005–present and measure total
-EIN applications filed with the IRS, excluding tax liens, estates,
-trusts, agriculture (NAICS 11), and public administration (NAICS 92).
+U.S. Census Bureau’s Business Formation Statistics (BFS). Data cover
+2005–present and measure total EIN applications filed with the IRS,
+excluding tax liens, estates, trusts, agriculture (NAICS 11), and public
+administration (NAICS 92).
 
 **Source:** U.S. Census Bureau, Business Formation Statistics
 **Coverage:** 2005–present, updated annually **Geography:** County
@@ -15,14 +15,22 @@ trusts, agriculture (NAICS 11), and public administration (NAICS 92).
 ``` r
 
 library(cori.data.bfs)
+library(dplyr)
+library(gt)
 
 get_bfs_codebook() |>
-  dplyr::select(variable, label, unit, notes) |>
-  knitr::kable()
+  select(variable, label, unit, notes) |>
+  gt() |>
+  cols_label(
+    variable = "Variable",
+    label    = "Label",
+    unit     = "Unit",
+    notes    = "Notes"
+  )
 ```
 
-| variable | label | unit | notes |
-|:---|:---|:---|:---|
+| Variable | Label | Unit | Notes |
+|----|----|----|----|
 | business_applications | Business applications | applications | Total business applications (BA series). Counts EIN applications filed with the IRS, excluding tax liens, estates, trusts, agriculture (NAICS 11), and public administration (NAICS 92). County, state, and national coverage. Coverage: 2005-present. |
 
 ## Reading data
@@ -34,7 +42,7 @@ All data are returned in long format: one row per
 
 df <- get_business_applications(geography = "county")
 
-dplyr::glimpse(df)
+glimpse(df)
 ```
 
 Filter to specific geographies, years, or variables:
@@ -47,7 +55,7 @@ nh_bfs <- get_business_applications(
   years  = 2010:2024
 )
 
-dplyr::glimpse(nh_bfs)
+glimpse(nh_bfs)
 ```
 
 ## Rural vs. Nonrural
@@ -59,51 +67,113 @@ CBSA 2023 rural definition.
 ``` r
 
 library(cori.charts)
+library(cori.data.pep)
 library(ggplot2)
 library(ruraldefinitions)
 library(dplyr)
 
 load_fonts()
 
-rural_xwalk <- ruraldefinitions::cbsa_2023 |>
+rural_definitions <- ruraldefinitions::cbsa_2023 |>
   select(geoid, is_rural)
 
-rural_avg <- df |>
-  left_join(rural_xwalk, by = "geoid") |>
-  filter(!is.na(is_rural)) |>
-  group_by(year, is_rural) |>
-  summarise(value = sum(value, na.rm = TRUE), .groups = "drop")
+# County population, 2005–2024
+county_pop <- get_population(
+  geoids    = unique(df$geoid),
+  variables = "population",
+  years     = 2005:2024
+) |>
+  select(
+    geoid,
+    year,
+    population = value
+  )
 
-ggplot(rural_avg, aes(x = year, y = value, color = is_rural)) +
-  annotate("rect", xmin = 2007.9, xmax = 2009.5,
-           ymin = -Inf, ymax = Inf, fill = "grey80", alpha = 0.4) +
-  annotate("rect", xmin = 2020, xmax = 2020.5,
-           ymin = -Inf, ymax = Inf, fill = "grey80", alpha = 0.4) +
+# Rural/nonrural business applications per 1,000 residents
+rural_avg <- df |>
+  left_join(rural_definitions, by = "geoid") |>
+  left_join(county_pop, by = c("geoid", "year")) |>
+  filter(
+    !is.na(is_rural),
+    !is.na(population),
+    population > 0
+  ) |>
+  group_by(year, is_rural) |>
+  summarise(
+    applications = sum(value, na.rm = TRUE),
+    population   = sum(population, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  mutate(
+    apps_per_1k = applications / population * 1000
+  )
+
+fig_rural <- ggplot(
+  rural_avg,
+  aes(
+    x = year,
+    y = apps_per_1k,
+    color = is_rural
+  )
+) +
+  annotate(
+    "rect",
+    xmin = 2007.9,
+    xmax = 2009.5,
+    ymin = -Inf,
+    ymax = Inf,
+    fill = "grey80",
+    alpha = 0.4
+  ) +
+  annotate(
+    "rect",
+    xmin = 2020,
+    xmax = 2020.5,
+    ymin = -Inf,
+    ymax = Inf,
+    fill = "grey80",
+    alpha = 0.4
+  ) +
   geom_line(linewidth = 1) +
   geom_point(size = 2.5) +
   scale_color_manual(
-    values = c("Rural" = "#2F6E9B", "Nonrural" = "#7EBDC2"),
-    labels = c("Rural" = "Rural counties", "Nonrural" = "Nonrural counties")
+    values = c(
+      "Rural"    = "#2F6E9B",
+      "Nonrural" = "#7EBDC2"
+    ),
+    labels = c(
+      "Rural"    = "Rural counties",
+      "Nonrural" = "Nonrural counties"
+    )
   ) +
   scale_x_continuous(
     breaks = seq(2005, 2024, by = 4),
-    expand = expansion(mult = c(0, 0.2))
+    expand = expansion(mult = c(0.01, 0.05))
   ) +
-  scale_y_continuous(labels = scales::label_number(scale = 1e-3, suffix = "K")) +
+  scale_y_continuous(
+    labels = scales::label_number(accuracy = 0.1),
+    expand = expansion(mult = c(0.04, 0.08))
+  ) +
   theme_cori() +
-  theme(legend.position = "bottom") +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank()
+  ) +
   labs(
-    title    = "Rural business formation surged during the pandemic and has held",
-    subtitle = "Total business applications (BA series), 2005\u20132024",
-    x        = NULL,
-    y        = NULL,
-    color    = NULL,
-    caption  = paste0(
+    title = "Rural business formation surged during the pandemic\nand has remained elevated",
+    subtitle = "Business applications per 1,000 residents, 2005–2024",
+    x = NULL,
+    y = NULL,
+    color = NULL,
+    caption = paste0(
       "Source: CORI analysis of U.S. Census Bureau Business Formation Statistics.\n",
-      "Shaded bands mark Great Recession (2008\u201309) and COVID-19 (2020). ",
+      "Population denominator from Census Population Estimates Program via cori.data.pep.\n",
+      "Shaded bands mark Great Recession (2008–09) and COVID-19 (2020).\n",
       "Rural classification: CORI CBSA 2023 definition."
     )
   )
+
+fig_rural
 ```
 
 ## County Spotlight: Grafton County, NH

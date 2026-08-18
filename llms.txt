@@ -5,8 +5,6 @@ Access and analyze U.S. Census Bureau Business Formation Statistics
 
 ## What’s in the package
 
-Two variables, county + state + national, annual:
-
 | Variable                | Description                             |
 |-------------------------|-----------------------------------------|
 | `business_applications` | Total business applications (BA series) |
