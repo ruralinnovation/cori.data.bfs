@@ -29,6 +29,7 @@ Remotes:
 Suggests:
     cori.charts,
     cori.data.pep,
+    gt,
     ruraldefinitions,
     ggplot2,
     ggrepel,
